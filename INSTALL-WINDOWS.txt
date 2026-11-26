@@ -1,0 +1,36 @@
+RAHEEQ INVOICES - INSTALL ON WINDOWS (no Netlify needed)
+=========================================================
+The app is a PWA: you put the folder on any free HTTPS web host once, then install it from Edge/Chrome like a normal program.
+IMPORTANT: unzip first, and upload the FILES INSIDE the folder (index.html must be at the top level), not the .zip itself.
+
+OPTION A - GitHub Pages (free, permanent)
+ 1. Create a free account at github.com and verify your email.
+ 2. Click "+" (top right) > New repository. Name: raheeq-invoices. Choose Public. Click Create repository.
+ 3. On the empty repo page click "uploading an existing file".
+ 4. Open the unzipped folder, press Ctrl+A to select ALL files (index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png, README.txt, INSTALL-WINDOWS.txt) and drag them into the browser. Wait until they finish uploading, then click "Commit changes".
+ 5. Go to Settings > Pages. Under "Build and deployment" set Source = "Deploy from a branch", Branch = main, folder = / (root). Click Save.
+ 6. Wait 1-3 minutes and refresh. The page shows: "Your site is live at https://YOUR-NAME.github.io/raheeq-invoices/". Open it.
+ (A public repo means anyone with the link can open the empty app, but your invoices are never uploaded there; your data stays in your browser and in your own Google Drive.)
+
+OPTION B - Cloudflare Pages (free)
+ 1. Create a free account at dash.cloudflare.com.
+ 2. Workers & Pages > Create > Pages > "Upload assets" (Direct Upload).
+ 3. Project name: raheeq-invoices > Create > drag the files from the unzipped folder > Deploy site.
+ 4. Open the address it gives you (https://raheeq-invoices.pages.dev).
+
+INSTALL ON EACH WINDOWS PC
+ 1. Open your link in Microsoft Edge or Google Chrome.
+ 2. Edge: menu (...) > Apps > Install this site as an app > Install.
+    Chrome: click the install icon at the right of the address bar (or menu > Cast, save and share > Install page as app).
+ 3. Pin it to the taskbar / Start menu if you like. It opens in its own window.
+
+SYNC BETWEEN PCs (needs internet; the app still works offline and syncs when the connection returns)
+ - Open the app > Follow-up tab > "Sync between devices". Paste the same Google script link and secret key on every PC, press "Test connection", then "Sync now".
+ - On a new PC choose "Use cloud data" when the app asks.
+
+UPDATING THE APP LATER
+ - Upload the new index.html and sw.js over the old ones (GitHub: Add file > Upload files > Commit). Then close and reopen the app twice.
+
+IF SOMETHING DOES NOT WORK
+ - Page not found: index.html was uploaded inside a sub-folder or you uploaded the zip. Upload the files themselves.
+ - No install button: the address must start with https:// and you must open it in Edge/Chrome (not the preview or a file on disk).
