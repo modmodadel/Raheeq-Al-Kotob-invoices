@@ -28,8 +28,11 @@ SYNC BETWEEN PCs (needs internet; the app still works offline and syncs when the
  - Open the app > Follow-up tab > "Sync between devices". Paste the same Google script link and secret key on every PC, press "Test connection", then "Sync now".
  - On a new PC choose "Use cloud data" when the app asks.
 
-UPDATING THE APP LATER
- - Upload the new index.html and sw.js over the old ones (GitHub: Add file > Upload files > Commit). Then close and reopen the app twice.
+UPDATING THE APP LATER (your data is NOT in GitHub, so updating never deletes it)
+ 1. When you get a new version, unzip it. Normally only index.html and sw.js changed.
+ 2. Open your repository on github.com > Add file > Upload files. Drag the new index.html and sw.js (same names replace the old ones) > Commit changes.
+ 3. Wait about 1-2 minutes for GitHub Pages to redeploy.
+ 4. Open the app (or press Ctrl+F5 in the browser) and check the version number printed at the bottom of the app. If it is still the old one, close and reopen the app once more.
 
 IF SOMETHING DOES NOT WORK
  - Page not found: index.html was uploaded inside a sub-folder or you uploaded the zip. Upload the files themselves.

@@ -66,18 +66,25 @@ i.dt{display:inline-block;width:12px;height:12px;border-radius:50%;margin-inline
 #cbp{position:fixed;display:none;max-height:min(280px,40vh);overflow:auto;background:var(--cd);border:2px solid var(--ac);border-radius:8px;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .cbo{padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:14px}.cbo.on,.cbo:hover{background:var(--ch)}
 input.cbi{min-width:210px}
+.sheet .mu{color:#666}
+.jg{display:grid;grid-template-columns:repeat(var(--c,2),1fr);gap:5px 12px}
+.jh{grid-column:1/-1;background:#E2A700;color:#1f1f1f;font-weight:700;padding:2px 10px;font-size:12px;break-after:avoid}
+.ji{display:flex;gap:8px;align-items:center;border:1px solid #ddd;border-radius:6px;padding:3px 6px;break-inside:avoid}
+.jc{width:34px;height:48px;object-fit:cover;border:1px solid #ccc;border-radius:3px;flex:none;display:flex;align-items:center;justify-content:center;background:#f3f3f3}
+.jt{flex:1;font-size:12px;line-height:1.3;min-width:0}.jt .mu{font-size:10px}
+.jb{width:64px;height:32px;border:1.5px solid #333;border-radius:4px;text-align:center;font-weight:700;line-height:29px;flex:none}
 .warn2{background:#fff6dd;color:#5a4300;border-right:4px solid #E2A700;border-radius:10px;padding:10px 14px;margin-bottom:12px}.warn2 button.s{color:#5a4300;border-color:#E2A700}
 a.b{display:inline-block;background:var(--ac);color:var(--bt);border-radius:8px;padding:9px 16px;font-weight:600;text-decoration:none;margin-top:10px}
 @media print{.bulk{display:none}}
 @page{size:A4;margin:0}
-@media print{body *{visibility:hidden}.sheet,.sheet *{visibility:visible}.sheet{position:absolute;inset:0;border:0;border-radius:0;min-height:297mm}}
+@media print{html,body{background:#fff}.hd,nav,.bulk,#cbp,#ver,#app>:not(.sheet){display:none!important}.w{padding:0;max-width:none}.sheet{border:0;border-radius:0;min-height:290mm}.sheet.fl{min-height:0}}
 </style>
 </head>
 <body>
 <div class="w">
 <div class="hd"><img id="hl" alt=""><div><h1>نظام فواتير دار رحيق الكتب</h1><div class="mu"><a class="lk" id="syn" onclick="go('fol')"></a></div></div></div>
 <nav id="nav"></nav>
-<div id="app"></div><div id="cbp"></div>
+<div id="app"></div><div id="cbp"></div><div id="ver" class="mu" style="text-align:center;margin:18px 0"></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
@@ -107,18 +114,19 @@ const tracked=v=>!!v.wh||v.lines.some(l=>l.w);
 const nid=()=>{S.nx=(S.nx||Date.now())+1;return S.nx};
 S.items.forEach(x=>{x.id??=nid();x.s=x.s||'';x.k??='غلاف عادي';x.mn=x.mn||0;x.cr=x.cr||0;x.st=x.st||'';x.dep=x.dep||'';x.isbn=x.isbn||''});
 S.invoices.forEach(v=>v.lines.forEach(l=>{if(l.k==null)l.k='غلاف عادي';if(!l.i){const it=S.items.find(x=>x.t==l.t&&x.k==l.k);if(it)l.i=it.id}}));
-S.moves=S.moves||[];S.notes=S.notes||[];S.cn??=1;S.dn??=1;S.me=S.me||{wa:'',em:''};
+S.moves=S.moves||[];S.transfers=S.transfers||[];S.tr??=1;S.notes=S.notes||[];S.cn??=1;S.dn??=1;S.me=S.me||{wa:'',em:''};
 S.invoices.forEach(v=>{v.pt??='cr';v.paid??=false;v.due??='';v.rem??=false});
 const PT={cash:'كاش',cr:'آجل',cons:'تحت التصريف'},TD=()=>new Date().toISOString().slice(0,10),dd=x=>Math.round((new Date(x)-new Date(TD()))/864e5),net=v=>tot(v.lines,v.kind?0:v.disc).n,tlab=v=>v.kind?(v.kind=='cn'?'إشعار دائن':'إشعار مدين'):PT[v.pt]||'آجل',docs=()=>[...S.invoices,...S.notes],sgn=v=>eg(v)*(v.kind=='cn'?-1:1);
 const newNote=()=>({kind:'cn',m:'',date:TD(),inv:'',reason:'',conv:false,rw:'',editId:null,ref:'',lines:[{i:'',d:'',q:1,p:0}]});
+const newTd=()=>({from:'mn',to:'cr',date:TD(),notes:'',imp:'',editId:null,ref:'',lines:[{i:'',q:1}]});
 let qf=false;
 const lsSave=()=>{try{localStorage.setItem(K,JSON.stringify(S));qf=false}catch(e){qf=true}};
 const cl={msg:'',cf:null,busy:false,v:0};
 const save=()=>{cl.v++;if(S.sy)S.sy.dirty=true;lsSave();clearTimeout(window._sy);window._sy=setTimeout(()=>pushCloud(false),1500)};
 const newDraft=()=>({m:'',date:new Date().toISOString().slice(0,10),disc:0,notes:'',conv:false,wh:'mn',wm:'one',imp:'',editId:null,ref:'',pt:'cr',due:'',rem:false,paid:false,vo:false,amt:'',desc:'',refm:'',lines:[{i:'',q:1,p:0}]});
-let tab='inv',draft=newDraft(),edit=null,cli=null,stp=false,show=null,msg='',bmsg='',delc=null,elogo='',eit=null,pre={},deli=null,tmsg='',imsg='',ftp='all',ffo='all',fst='all',nd=newNote(),nmsg='',selI=[],selB=[],visI=[],visB=[],fser='',delbI=false,delbB=false,bsm='',rq=null;
-const T=[['inv','الفواتير'],['fol','المتابعة'],['not','الإشعارات'],['mer','العملاء'],['ana','التحليلات'],['cat','المخزن'],['cur','العملات']];
-const go=k=>{tab=k;show=null;edit=null;cli=null;stp=false;icov='';bmsg='';delc=null;selI=[];selB=[];delbI=false;delbB=false;bsm='';eit=null;pre={};deli=null;tmsg='';imsg='';render()};
+let tab='inv',draft=newDraft(),edit=null,cli=null,stp=false,show=null,msg='',bmsg='',delc=null,elogo='',eit=null,pre={},deli=null,tmsg='',imsg='',ftp='all',ffo='all',fst='all',nd=newNote(),nmsg='',selI=[],selB=[],visI=[],visB=[],fser='',delbI=false,delbB=false,bsm='',rq=null,td=newTd(),tmsg2='',tv=null,deltT=null,jr={wh:'mn',ser:'',sys:false,hz:false,cols:2,grp:true},jv=false;
+const T=[['inv','الفواتير'],['fol','المتابعة'],['not','الإشعارات'],['mer','العملاء'],['ana','التحليلات'],['cat','المخزن'],['trf','التحويلات'],['cur','العملات']];
+const go=k=>{tab=k;show=null;edit=null;cli=null;stp=false;icov='';bmsg='';delc=null;jv=false;tv=null;deltT=null;selI=[];selB=[];delbI=false;delbB=false;bsm='';eit=null;pre={};deli=null;tmsg='';imsg='';render()};
 const cm=()=>S.merchants.find(x=>x.id==draft.m);
 function fx(m,conv){
 if(!m||m.type!='int')return{cur:'EGP',rate:1,u:0};
@@ -167,7 +175,7 @@ function applyInv(v,sg){if(!v)return;v.lines.forEach(l=>{const w=l.w||v.wh;if(!w
 function shortOf(L,old){const need={},back={};L.forEach(l=>{const k=l.w+'|'+l.i;need[k]=(need[k]||0)+l.q});if(old)old.lines.forEach(l=>{const w=l.w||old.wh;if(w){const k=w+'|'+l.i;back[k]=(back[k]||0)+l.q}});return Object.keys(need).map(k=>{const [w,i]=k.split('|'),it=S.items.find(x=>x.id==i),av=it?(it[w]||0)+(back[k]||0):0;return it&&av<need[k]?`${lbl(it)} — ${WH[w]} (المتاح ${av})`:null}).filter(Boolean)}
 function render(){
 $('#nav').innerHTML=T.map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="go('${k}')">${l}</button>`).join('');
-$('#app').innerHTML=cfB()+(show?sheet(show):(tab=='mer'&&cli)?(stp?stSheet(cli):vCli()):{inv:vInv,fol:vFol,not:vNot,mer:vMer,ana:vAna,cat:vCat,cur:vCur}[tab]());syncPill()}
+$('#app').innerHTML=cfB()+(show?sheet(show):(tab=='mer'&&cli)?(stp?stSheet(cli):vCli()):(tab=='cat'&&jv)?jrSheet():(tab=='trf'&&tv)?tSheet(tv):{inv:vInv,fol:vFol,not:vNot,mer:vMer,ana:vAna,cat:vCat,trf:vTrf,cur:vCur}[tab]());syncPill()}
 const tots=(t,c)=>`<div>الإجمالي قبل الخصم: ${f(t.s)} ${cs(c)}</div><div>الخصم: ${f(t.x)} ${cs(c)}</div><b>الصافي: ${f(t.n)} ${cs(c)}</b>`;
 function uT(){if(!$('#tt'))return;$('#tt').innerHTML=tots(tot(draft.lines,draft.disc),fx(cm(),draft.conv).cur);draft.lines.forEach((l,i)=>{const e=$('#r'+i);if(e)e.textContent=f(l.q*l.p)})}
 function pm(v){draft.m=v;const m=cm();if(m){draft.disc=m.disc;draft.notes=m.notes;draft.conv=!!m.conv;draft.pt=m.pt||'cr';draft.paid=draft.pt=='cash';if(draft.pt=='cash'){draft.due='';draft.rem=false}}rep();render()}
@@ -185,7 +193,7 @@ return (rm.length?`<div class=warn2><b>🔔 تذكيرات السداد</b><div>
 <label>العميل<select onchange="pm(this.value)"><option value="">— اختر العميل —</option>${S.merchants.map(y=>`<option value="${y.id}"${y.id==d.m?' selected':''}>${esc(y.n)}${y.type=='int'?' 🌍':''}</option>`).join('')}</select></label>
 <label>التاريخ<input type=date value="${d.date}" onchange="draft.date=this.value"></label>
 ${d.vo?'':`<label>نسبة الخصم %<input type=number min=0 max=100 value="${d.disc}" oninput="draft.disc=+this.value;uT()"></label>`}
-${d.vo?'':`<label>مصدر العناوين<select onchange="wmode(this.value)"><option value=one${d.wm!='multi'?' selected':''}>مخزن واحد لكل العناوين</option><option value=multi${d.wm=='multi'?' selected':''}>أكثر من مخزن (لكل عنوان)</option></select></label>${d.wm=='multi'?'':`<label>الخصم من<select onchange="draft.wh=this.value;draft.lines.forEach(l=>l.w=draft.wh);render()">${Object.entries(WH).map(([k,v])=>`<option value=${k}${d.wh==k?' selected':''}>${v}</option>`).join('')}</select></label>`}`}
+${d.vo?'':`<div style="grid-column:1/-1"><div class=mu>مصدر العناوين (الخصم من):</div>${[['mn',WH.mn],['cr',WH.cr],['multi','أكثر من مخزن (لكل عنوان)']].map(([k,l])=>`<button class="${(k=='multi'?d.wm=='multi':(d.wm!='multi'&&d.wh==k))?'b':'s'}" style="margin:2px" onclick="wsrc('${k}')">${l}</button>`).join('')}</div>`}
 <label>نوع البيع<select onchange="pt_(this.value)">${Object.entries(PT).map(([k,v])=>`<option value=${k}${d.pt==k?' selected':''}>${v}</option>`).join('')}</select></label>
 ${d.pt=='cash'?`<label style="display:flex;gap:6px;align-items:center"><input type=checkbox style="width:auto" ${d.paid?'checked':''} onchange="draft.paid=this.checked">سُدِّدت عند الإصدار</label>`:`<label>تاريخ استحقاق السداد<input type=date value="${d.due}" onchange="draft.due=this.value"></label>`}</div>
 ${d.pt!='cash'?`<div style="margin-top:6px">${[30,60,90].map(n=>`<button class=s onclick="dd_(${n})">+${n} يومًا</button>`).join(' ')} <label style="display:inline-flex;gap:6px;align-items:center;margin-inline-start:10px"><input type=checkbox style="width:auto" ${d.rem?'checked':''} onchange="draft.rem=this.checked">ذكّرني بميعاد السداد</label></div>`:''}
@@ -286,8 +294,15 @@ return `${tl}<div class=card><b>إجمالي النسخ:</b> ${WH.mn}: ${f(tk[0]
 <input type=file accept=".xlsx,.xls,.csv" style="margin-top:8px" onchange="xl(this)">
 <details style="margin-top:10px"><summary class=mu>أو الصق الصفوف من Excel</summary><textarea id=bk rows=5 placeholder="سلسلة حكايات | حكايات الصباح | | 60 | 5 | 2025/1234 | 978-977-000-100-0 | 300 | 40"></textarea><button class=b onclick="bulk()">إضافة المُلصق</button></details>
 <p class=mu id=bmsg>${bmsg}</p></div>
-<div class=card><h2>نقل من ${WH.mn} إلى ${WH.cr}</h2><div class=g2><label>العنوان<select id=tf><option value="">— اختر —</option>${S.items.filter(x=>x.mn>0).map(x=>`<option value="${x.id}">${esc(lbl(x))} · ${WH.mn}: ${x.mn}</option>`).join('')}</select></label><label>العدد<input id=tq type=number min=1></label></div>
-<p class="${tmsg?'ok':'err'}" id=tmsg>${tmsg}</p><button class=b onclick="mv()">نقل</button>${S.moves.length?`<div class=mu style="margin-top:8px">آخر عمليات النقل:</div>`+S.moves.slice(0,5).map(m=>`<div class=mu>${m.d} — ${esc(m.l)} — ${m.q} نسخة</div>`).join(''):''}</div>
+<div class=card><h2>طباعة الجرد</h2><p class=mu>ورقة جرد مختصرة: صورة الغلاف والعنوان وخانة للعدد، بعدة أعمدة لتقليل عدد الصفحات.</p><div class=g2>
+<label>المخزن<select onchange="jr.wh=this.value">${Object.entries(WH).map(([k,v])=>`<option value=${k}${jr.wh==k?' selected':''}>${v}</option>`).join('')}</select></label>
+<label>السلسلة<select onchange="jr.ser=this.value"><option value="">— كل السلسلات —</option>${[...new Set(S.items.map(x=>x.s).filter(Boolean))].map(y=>`<option${jr.ser==y?' selected':''}>${esc(y)}</option>`).join('')}</select></label>
+<label>الأعمدة في الصفحة<select onchange="jr.cols=+this.value">${[1,2,3].map(n=>`<option value=${n}${jr.cols==n?' selected':''}>${n}</option>`).join('')}</select></label></div>
+<label style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type=checkbox style="width:auto" ${jr.sys?'checked':''} onchange="jr.sys=this.checked">اكتب رصيد النظام الحالي داخل الخانة (وإلا تبقى فارغة للعدّ اليدوي)</label>
+<label style="display:flex;gap:6px;align-items:center"><input type=checkbox style="width:auto" ${jr.hz?'checked':''} onchange="jr.hz=this.checked">إخفاء العناوين ذات الرصيد صفر</label>
+<label style="display:flex;gap:6px;align-items:center"><input type=checkbox style="width:auto" ${jr.grp?'checked':''} onchange="jr.grp=this.checked">تجميع العناوين حسب السلسلة</label>
+<button class=b onclick="jv=true;render();scrollTo(0,0)">معاينة وطباعة الجرد</button></div>
+<div class=card><h2>نقل بين المخزنين</h2><p class=mu>النقل صار بنفس طريقة الفواتير: عدة عناوين في مرة واحدة، أو من رسالة فيها العناوين والأعداد.</p><button class=b style="margin:0" onclick="go('trf')">فتح التحويلات</button></div>
 ${bulkBarB()}<div class=card><label>تصفية حسب السلسلة<select onchange="fser=this.value;selB=[];render()"><option value="">— كل السلسلات —</option>${[...new Set(S.items.map(x=>x.s).filter(Boolean))].map(y=>`<option${y==fser?' selected':''}>${esc(y)}</option>`).join('')}</select></label><div class=tw><table><tr><th><input type=checkbox style="width:auto" ${visB.length&&selB.length==visB.length?'checked':''} onchange="allB(this.checked)"><th>العنوان<th>السلسلة<th>النوع<th>ISBN<th>رقم الإيداع<th>ج.م.<th>$<th>${WH.mn}<th>${WH.cr}<th></tr>${ix.map(i=>{const x=S.items[i];return `<tr><td><input type=checkbox style="width:auto" ${selB.includes(x.id)?'checked':''} onchange="tgB(${x.id})"><td style="white-space:nowrap">${x.cv?`<img class=cv src="${x.cv}" alt="">`:''}${dot(x.mn||0)}${esc(x.t)}${x.st?`<div class=mu>${esc(x.st)}</div>`:''}<td>${esc(x.s)}<td>${esc(x.k)}<td dir=ltr>${esc(x.isbn||'')}<td>${esc(x.dep||'')}<td>${f(x.p)}<td>${f(x.u)}<td>${f(x.mn||0)}<td>${f(x.cr||0)}<td style="white-space:nowrap"><button class=s onclick="eti(${x.id})">تعديل</button> <button class=s onclick="addTy(${x.id})">+ نوع</button> <button class=s onclick="di(${x.id})">${deli==x.id?'تأكيد الحذف؟':'حذف'}</button></tr>`}).join('')}</table></div></div>`}
 function bulk(){const wh=$('#bw').value;
 imp($('#bk').value.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>l.split(l.includes('\t')?'\t':l.includes('|')?'|':/[;،,]/).map(x=>x.trim())),wh)}
@@ -419,7 +434,7 @@ ${top.length?`<div class=card><h2>أكثر العناوين شراءً</h2>${top
 function stSheet(id){
 const m=S.merchants.find(x=>x.id==id),L=led(m);
 return `<div class=card><button class=b style="margin-top:0" onclick="window.print()">🖨 طباعة / حفظ PDF</button> <button class=s onclick="stp=false;render()">رجوع</button></div>
-<div class=sheet>${lh()}<div class=bd><div class=ti>كشف حساب</div>
+<div class="sheet fl">${lh()}<div class=bd><div class=ti>كشف حساب</div>
 <div class=meta><div><span>التاريخ</span><b>${TD()}</b></div></div>
 <div class=bill>${m.logo?`<img src="${m.logo}" alt="">`:''}<div><span>السادة /</span><b>${esc(m.n)}</b><br>${esc(m.addr)}${m.country?' — '+esc(m.country):''}</div></div>
 <div class=tw>${ledT(L)}</div>
@@ -490,7 +505,7 @@ p.innerHTML=cb.list.map((y,n)=>!y?`<div class="cbo${n==cb.hi?' on':''}" onmoused
 cbPos();const on=p.children[cb.hi];if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest'})}
 function cbKey(e){if(!cb)return;if(e.key=='ArrowDown'){cb.hi=Math.min(cb.hi+1,cb.list.length-1);cbRender();e.preventDefault()}else if(e.key=='ArrowUp'){cb.hi=Math.max(cb.hi-1,0);cbRender();e.preventDefault()}else if(e.key=='Enter'){e.preventDefault();const y=cb.list[cb.hi];if(y!==undefined)cbPick(y?y.id:'')}else if(e.key=='Escape'){cbBlur(cb.el)}}
 function cbBlur(el){el.value=el.dataset.cur||'';cb=null;$('#cbp').style.display='none'}
-function cbPick(id){const c=cb;cb=null;$('#cbp').style.display='none';if(!c)return;if(c.k=='n')pln(c.i,String(id));else if(c.k=='r'){const l=rq.lines[c.i];l.i=id;l.sc=1;l.amb=false;render()}else pl(c.i,String(id))}
+function cbPick(id){const c=cb;cb=null;$('#cbp').style.display='none';if(!c)return;if(c.k=='n')pln(c.i,String(id));else if(c.k=='r'){const l=rq.lines[c.i];l.i=id;l.sc=1;l.amb=false;render()}else if(c.k=='t'){td.lines[c.i].i=id;render()}else pl(c.i,String(id))}
 addEventListener('scroll',e=>{if(cb&&!(e.target&&e.target.id=='cbp'))cbPos()},true);addEventListener('resize',()=>cbPos());
 const SW=new Set(['من','في','على','عن','الي','او','عايز','عاوز','عاوزه','محتاج','محتاجه','اريد','نريد','مطلوب','طلب','طلبيه','نسخه','نسخ','كتاب','كتب','عدد','كميه','الكميه','لو','سمحت','فضلك','يا','the','a','of','book','copies','copy','pcs']),
 SK={'ت':'ب','ث':'ب','ن':'ب','ي':'ب','خ':'ج','ح':'ج','ذ':'د','ز':'ر','ش':'س','ض':'ص','ظ':'ط','غ':'ع','ق':'ف'},
@@ -555,20 +570,76 @@ r.onload=()=>{try{const wb=XLSX.read(r.result,{type:'array'});rqSet(parseSheet(X
 function rqText(){const t=$('#rqt').value;rq.txt=t;rqSet(parseMsg(t))}
 function rqGo(){
 const L=rq.lines.filter(l=>l.i&&l.q>0);if(!L.length){rq.msg='لا توجد بنود مطابقة بعد — اختر العنوان لكل بند';render();return}
-const sk=rq.lines.filter(l=>!l.i||!(l.q>0)),m=rq.m;draft=newDraft();if(m)pm(String(m));
-const mp={};L.forEach(l=>mp[l.i]=(mp[l.i]||0)+l.q);
+const sk=rq.lines.filter(l=>!l.i||!(l.q>0)),m=rq.m,mp={};L.forEach(l=>mp[l.i]=(mp[l.i]||0)+l.q);
+if(rq.for=='trf'){td=newTd();td.lines=Object.keys(mp).map(k=>({i:S.items.find(x=>x.id==k).id,q:mp[k]}));td.imp=`تم استيراد ${td.lines.length} عنوان — راجع الكميات ثم احفظ التحويل.`+(sk.length?` تجاهلتُ ${sk.length} بند غير مطابق: ${sk.map(l=>l.raw).slice(0,5).join('، ')}`:'');rq=null;tab='trf';tv=null;tmsg2='';render();scrollTo(0,0);return}
+draft=newDraft();if(m)pm(String(m));
 draft.lines=Object.keys(mp).map(k=>{const it=S.items.find(x=>x.id==k);return{i:it.id,t:it.t,st:it.st||'',k:it.k,s:it.s,q:mp[k],w:draft.wh,p:bp(it,cm(),draft.conv)}});
 draft.imp=`تم استيراد ${draft.lines.length} عنوان من طلبية العميل — راجع الكميات والأسعار ثم أصدر الفاتورة.`+(sk.length?` تجاهلتُ ${sk.length} بند غير مطابق: ${sk.map(l=>l.raw).slice(0,5).join('، ')}`:'');
 rq=null;tab='inv';show=null;msg='';render();scrollTo(0,0)}
 function vReq(){const r=rq,n=r.lines.length,ok=r.lines.filter(l=>l.i).length;
-return `<div class=card style="border-color:var(--ac)"><h2>استيراد طلبية عميل</h2>
+return `<div class=card style="border-color:var(--ac)"><h2>${r.for=='trf'?'استيراد قائمة تحويل من رسالة أو ملف':'استيراد طلبية عميل'}</h2>
 <p class=mu>ارفع ملف الطلبية (Excel أو CSV أو TXT) أو الصق نصها (أسطر مثل: «حكايات الصباح 50»). يقرأ التطبيق العناوين والأعداد ويطابقها مع المخزن، ثم تراجعها وتكمل الفاتورة بدل البدء من الصفر.</p>
-<div class=g2><label>العميل (يمكن اختياره لاحقًا)<select onchange="rq.m=this.value"><option value="">— اختر العميل —</option>${S.merchants.map(y=>`<option value="${y.id}"${y.id==r.m?' selected':''}>${esc(y.n)}</option>`).join('')}</select></label>
+<div class=g2>${r.for=='trf'?'':`<label>العميل (يمكن اختياره لاحقًا)<select onchange="rq.m=this.value"><option value="">— اختر العميل —</option>${S.merchants.map(y=>`<option value="${y.id}"${y.id==r.m?' selected':''}>${esc(y.n)}</option>`).join('')}</select></label>`}
 <label>ملف الطلبية (Excel / CSV / TXT / صورة)<input type=file accept=".xlsx,.xls,.csv,.txt,image/*" onchange="rqFile(this)"></label></div>
 <label style="margin-top:8px">أو الصق الطلبية هنا<textarea id=rqt rows=4 placeholder="حكايات الصباح 50&#10;قصص قبل النوم - 30">${esc(r.txt||'')}</textarea></label>
 <button class=s onclick="rqText()">قراءة النص</button><div id=rqp class=mu></div>${r.msg?`<p class=err>${esc(r.msg)}</p>`:''}${r.info?`<p class=mu>${esc(r.info)}</p>`:''}${r.img&&n?`<div class=mu>الصورة الأصلية (للمراجعة — تأكد من الأرقام):</div><img src="${r.img}" style="max-width:100%;max-height:220px;border:1px solid var(--bd);border-radius:6px" alt="">`:''}
 ${n?`<div class=tw><table><tr><th>نص العميل<th>الكمية<th>العنوان في المخزن<th></tr>${r.lines.map((l,i)=>{const it=S.items.find(x=>x.id==l.i);return `<tr><td>${esc(l.raw)}<td><input type=number min=1 style="width:70px" value="${l.q}" oninput="rq.lines[${i}].q=+this.value"><td>${cbHtml('r',i,it?cbLab(it):'','اكتب للبحث…')}${it?(l.sc<1?`<div class=mu>تطابق تقريبي ${Math.round(l.sc*100)}% — تأكد منه</div>`:''):'<div class=err>غير مطابق — اختر العنوان يدويًا</div>'}${l.amb?'<div class=mu>⚠️ عدة عناوين متقاربة — تأكد من الاختيار</div>':''}${(l.c||[]).filter(x=>x.i!=l.i&&S.items.some(y=>y.id==x.i)).map(x=>`<button class=s onclick="rqPick(${i},${x.i})">${esc(lbl(S.items.find(y=>y.id==x.i)))} (${Math.round(x.sc*100)}%)</button>`).join(' ')}<td><button class=s onclick="rq.lines.splice(${i},1);render()">✕</button></tr>`}).join('')}</table></div>
-<p class=mu>${ok} من ${n} بند مطابق</p><button class=b onclick="rqGo()">متابعة الفاتورة</button> `:''}<button class=s onclick="rq=null;render()">إلغاء</button></div>`}
+<p class=mu>${ok} من ${n} بند مطابق</p><button class=b onclick="rqGo()">${r.for=='trf'?'متابعة التحويل':'متابعة الفاتورة'}</button> `:''}<button class=s onclick="rq=null;render()">إلغاء</button></div>`}
+const VER='2026.11.27';
+$('#ver').textContent='إصدار التطبيق '+VER;
+function wsrc(k){if(k=='multi')wmode('multi');else{draft.wm='one';draft.wh=k;draft.lines.forEach(l=>l.w=k);render()}}
+function jrSheet(){
+const w=jr.wh,L=S.items.filter(x=>(!jr.ser||x.s==jr.ser)&&(!jr.hz||(x[w]||0)>0)).sort((a,b)=>(a.s||'\uffff').localeCompare(b.s||'\uffff','ar')||a.t.localeCompare(b.t,'ar')),tt=L.reduce((a,x)=>a+(x[w]||0),0);
+let last='\u0000',h='';
+L.forEach(x=>{if(jr.grp&&(x.s||'')!==last){last=x.s||'';h+=`<div class=jh>${esc(last||'بدون سلسلة')}</div>`}
+h+=`<div class=ji>${x.cv?`<img class=jc src="${x.cv}" alt="">`:`<div class=jc>📕</div>`}<div class=jt><b>${esc(x.t)}</b>${x.st?`<div>${esc(x.st)}</div>`:''}<div class=mu>${esc(x.k||'')}${x.isbn?' · '+esc(x.isbn):''}</div></div><div class=jb>${jr.sys?f(x[w]||0):''}</div></div>`});
+return `<div class=card><button class=b style="margin-top:0" onclick="window.print()">🖨 طباعة / حفظ PDF</button> <button class=s onclick="jv=false;render()">رجوع</button></div>
+<div class="sheet fl">${lh()}<div class=bd><div class=ti>جرد ${WH[w]}</div>
+<div class=meta><div><span>التاريخ</span><b>${TD()}</b></div><div><span>عدد العناوين</span><b>${f(L.length)}</b></div>${jr.sys?`<div><span>إجمالي النسخ بالنظام</span><b>${f(tt)}</b></div>`:''}${jr.ser?`<div><span>السلسلة</span><b>${esc(jr.ser)}</b></div>`:''}</div>
+<div class=jg style="--c:${jr.cols}">${h||'<div class=mu>لا توجد عناوين</div>'}</div>
+<div class=sg><div>القائم بالجرد<br><br>التوقيع: ..................</div><div>أمين المخزن<br><br>التوقيع: ..................</div></div></div>${lf()}</div>`}
+function tcap(t,sg){t.lines.forEach(l=>{const it=S.items.find(x=>x.id==l.i);if(it){it[t.from]=(it[t.from]||0)-sg*l.q;it[t.to]=(it[t.to]||0)+sg*l.q}})}
+function tcanRev(t){const need={};t.lines.forEach(l=>need[l.i]=(need[l.i]||0)+l.q);return Object.keys(need).every(k=>{const it=S.items.find(x=>x.id==k);return !it||(it[t.to]||0)>=need[k]})}
+function tshort(L,from,old){const need={};L.forEach(l=>need[l.i]=(need[l.i]||0)+l.q);return Object.keys(need).map(k=>{const it=S.items.find(x=>x.id==k);let av=it?(it[from]||0):0;if(old)old.lines.forEach(l=>{if(l.i==k){if(old.from==from)av+=l.q;if(old.to==from)av-=l.q}});return it&&av<need[k]?`${lbl(it)} (المتاح في ${WH[from]}: ${Math.max(0,av)})`:null}).filter(Boolean)}
+function uT2(){const e=$('#tt2');if(e)e.textContent=f(td.lines.filter(l=>l.i).reduce((a,l)=>a+(l.q||0),0))}
+function addSerT(){const s=$('#srt').value,q=+$('#sqt').value||1;if(!s)return;td.lines=td.lines.filter(l=>l.i);S.items.filter(i=>i.s==s).forEach(it=>{if(!td.lines.some(l=>l.i==it.id))td.lines.push({i:it.id,q})});render()}
+function saveT(){
+const mp={};td.lines.filter(l=>l.i&&l.q>0).forEach(l=>mp[l.i]=(mp[l.i]||0)+l.q);const L=Object.keys(mp).map(k=>({i:S.items.find(x=>x.id==k)?S.items.find(x=>x.id==k).id:k,q:mp[k]}));
+if(!L.length){tmsg2='أضف عنوانًا واحدًا على الأقل';render();return}
+if(td.from==td.to){tmsg2='اختر مخزنين مختلفين';render();return}
+const old=td.editId?S.transfers.find(x=>x.id==td.editId):null;
+if(old&&!tcanRev(old)){tmsg2='لا يمكن تعديل هذا التحويل: جزء من الكمية المنقولة لم يعد في '+WH[old.to];render();return}
+const sh=tshort(L,td.from,old);if(sh.length){tmsg2='الكمية أكبر من المتاح: '+sh.join('، ');render();return}
+tmsg2='';if(old)tcap(old,-1);
+const lines=L.map(l=>{const it=S.items.find(x=>x.id==l.i);return{i:it.id,t:it.t,st:it.st||'',k:it.k,s:it.s,q:l.q}}),o={date:td.date,from:td.from,to:td.to,notes:td.notes,lines};let v;
+if(old){v=old;Object.assign(v,o)}else{v={id:nid(),ref:'TR-'+td.date.slice(0,4)+'-'+String(S.tr++).padStart(4,'0'),...o};S.transfers.unshift(v)}
+tcap(v,1);save();td=newTd();tv=v.id;render();scrollTo(0,0)}
+function eT(id){const v=S.transfers.find(x=>x.id==id);if(!v)return;td={from:v.from,to:v.to,date:v.date,notes:v.notes||'',imp:'',editId:v.id,ref:v.ref,lines:v.lines.map(l=>({i:l.i,q:l.q}))};tmsg2='';tv=null;tab='trf';render();scrollTo(0,0)}
+function dT(id){const v=S.transfers.find(x=>x.id==id);if(!v)return;
+if(deltT==id){if(!tcanRev(v)){tmsg2='لا يمكن حذف التحويل: جزء من الكمية المنقولة لم يعد في '+WH[v.to];deltT=null;render();return}tcap(v,-1);S.transfers=S.transfers.filter(x=>x.id!=id);deltT=null;tv=null;save()}else deltT=id;render()}
+function tSheet(id){const v=S.transfers.find(x=>x.id==id);if(!v){tv=null;return vTrf()}
+const n=v.lines.reduce((a,l)=>a+l.q,0);
+return `<div class=card><button class=b style="margin-top:0" onclick="window.print()">🖨 طباعة / حفظ PDF</button> <button class=s onclick="eT(${v.id})">تعديل</button> <button class=s onclick="tv=null;render()">رجوع</button></div>
+<div class="sheet fl">${lh()}<div class=bd><div class=ti>إذن تحويل مخزني</div>
+<div class=meta><div><span>الرقم المرجعي</span><b dir=ltr>${v.ref}</b></div><div><span>التاريخ</span><b>${v.date}</b></div><div><span>من</span><b>${WH[v.from]}</b></div><div><span>إلى</span><b>${WH[v.to]}</b></div></div>
+<div class=tw><table class=it><tr><th>م<th>العنوان<th>الكمية</tr>${v.lines.map((l,i)=>`<tr><td>${i+1}<td>${esc(l.t)}${l.st?': '+esc(l.st):''}${l.k?' — '+esc(l.k):''}${l.s?`<div class=sm>${esc(l.s)}</div>`:''}<td>${l.q}</tr>`).join('')}</table></div>
+<div class=tt2><div class=nt><span>إجمالي النسخ</span><b>${f(n)}</b></div></div>
+${v.notes?`<p class=note><b>ملاحظات:</b> ${esc(v.notes)}</p>`:''}
+<div class=sg><div>أمين ${WH[v.from]}<br><br>التوقيع: ..................</div><div>أمين ${WH[v.to]}<br><br>التوقيع: ..................</div></div></div>${lf()}</div>`}
+function vTrf(){
+const sr=[...new Set(S.items.map(i=>i.s).filter(Boolean))],n=td.lines.filter(l=>l.i).reduce((a,l)=>a+(l.q||0),0),opt=v=>Object.entries(WH).map(([k,w])=>`<option value=${k}${v==k?' selected':''}>${w}</option>`).join('');
+return (rq?vReq():`<div class=card style="padding:8px 14px"><button class=s style="margin:0" onclick="rq={for:'trf',m:'',lines:[],msg:'',txt:''};render()">📥 استيراد قائمة تحويل (رسالة / Excel / صورة)</button></div>`)+
+`<div class=card><h2>${td.editId?'تعديل التحويل '+td.ref:'تحويل مخزني جديد'}</h2>${tmsg2?`<p class=err>${esc(tmsg2)}</p>`:''}${td.imp?`<p class=mu>ℹ️ ${esc(td.imp)}</p>`:''}<div class=g2>
+<label>من<select onchange="td.from=this.value;render()">${opt(td.from)}</select></label>
+<label>إلى<select onchange="td.to=this.value;render()">${opt(td.to)}</select></label>
+<label>التاريخ<input type=date value="${td.date}" onchange="td.date=this.value"></label></div>
+<div class=tw><table><tr><th>العنوان (المتاح في ${WH[td.from]})<th>الكمية<th></tr>${td.lines.map((l,i)=>`<tr><td>${cbHtml('t',i,curLab(l),'اكتب للبحث عن عنوان…',td.from)}${stockNote(l,td.from)}<td><input type=number min=1 value="${l.q}" style="width:80px" oninput="td.lines[${i}].q=+this.value;uT2()"><td><button class=s onclick="td.lines.splice(${i},1);render()">✕</button></tr>`).join('')}</table></div>
+<button class=s onclick="td.lines.push({i:'',q:1});render()">+ إضافة عنوان</button>
+${sr.length?`<div class=g2 style="margin-top:10px"><label>أو أضف سلسلة كاملة<select id=srt><option value="">— السلسلة —</option>${sr.map(y=>`<option>${esc(y)}</option>`).join('')}</select></label><label>الكمية لكل عنوان<input id=sqt type=number min=1 value=10></label></div><button class=s onclick="addSerT()">+ إضافة كل عناوين السلسلة</button>`:''}
+<label style="margin-top:10px">ملاحظات<textarea rows=2 oninput="td.notes=this.value">${esc(td.notes)}</textarea></label>
+<div class=tots>إجمالي النسخ: <b id=tt2>${f(n)}</b></div>
+<button class=b onclick="saveT()">${td.editId?'حفظ التعديلات':'حفظ التحويل'}</button>${td.editId?` <button class=s onclick="td=newTd();render()">إلغاء التعديل</button>`:''}</div>
+<div class=card><h2>التحويلات</h2><div class=tw><table><tr><th>الرقم<th>التاريخ<th>من ← إلى<th>العناوين<th>النسخ<th></tr>${S.transfers.map(v=>`<tr><td>${v.ref}<td>${v.date}<td>${WH[v.from]} ← ${WH[v.to]}<td>${v.lines.length}<td>${f(v.lines.reduce((a,l)=>a+l.q,0))}<td style="white-space:nowrap"><button class=s onclick="tv=${v.id};render()">عرض</button> <button class=s onclick="eT(${v.id})">تعديل</button> <button class=s onclick="dT(${v.id})">${deltT==v.id?'تأكيد الحذف؟ (يعيد الأعداد)':'حذف'}</button></tr>`).join('')||'<tr><td colspan=6 class=mu>لا توجد تحويلات بعد'}</table></div></div>`}
 function vCur(){
 return `<div class=card><h2>أسعار الصرف (لكل 1 دولار)</h2><p class=mu>تُستخدم عند تفعيل «تحويل الأسعار» لعميل دولي. الأسعار الحالية تقريبية، حدّثها يدويًا قبل الإصدار.</p>
 <label>آخر تحديث<input type=date value="${S.rd}" onchange="S.rd=this.value;save()"></label>
